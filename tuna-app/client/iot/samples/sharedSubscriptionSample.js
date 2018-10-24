@@ -58,12 +58,18 @@ return{
 
   get_final_status:function(req, res){
      
-      res = session.status;
-     // console.log(session.app_Client);     
-     // session.app_Client.log.setLevel('info');
-      session.app_Client.disconnect();
-      session.status = '';	
-      return res;
+	if(session.status==''){
+		var respose = "Waste";
+		return respose;
+	}
+	else{
+      		res = session.status;
+    		// console.log(session.app_Client);     
+   		// session.app_Client.log.setLevel('info');
+     	 	session.app_Client.disconnect();
+		session.status = '';	
+      		return res;
+	}
 }
 }
 })();

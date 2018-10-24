@@ -65,6 +65,115 @@
       <i id="right_header">Blockchain application</i>
     </header>
 
+     <div class="container"><h2>Supply chain Application with IOT integration</h2></div>
+	<div id="exTab2" class="container">	
+		<ul class="nav nav-tabs">
+			<li class="active">
+        		<a  href="#1" data-toggle="tab">Submit record</a>
+			</li>
+			<li><a href="#2" data-toggle="tab">Search record</a>
+			</li>
+			<li><a href="#3" data-toggle="tab">Dashboard</a>
+			</li>
+		</ul>
+
+		<div class="tab-content ">
+			<div class="tab-pane active" id="1">
+        			<div class="form-group"> <br>
+        <label>Create Record</label>
+        <p id="succTX"><h5 style="color:green;margin-bottom:2%" id="success_create">Success! Tx ID: {{create_tuna}}</h5></p>
+        
+        Enter catch id: <input id="recordId" class="form-control" type="text" placeholder="Ex: 11" ng-model="tuna.id">
+        Enter name of vessel: <input class="form-control" type="text" placeholder="Ex: 0239L" ng-model="tuna.vessel">
+        Enter name of holder: <input class="form-control" type="text" placeholder="Ex: Hansel" ng-model="tuna.holder">
+        <input id="createSubmit" type="submit" value="Create" class="btn btn-primary" ng-click="addRecord()" onclick="startIOT()">
+	</div>
+
+			</div>
+			<div class="tab-pane" id="2"><br>
+        <label>Query a Specific record</label><br>
+        <h5 style="color:red;margin-bottom:2%" id="error_query">Error: Please enter a valid  Id</h5>
+
+         <input id="createName" class="form-control" type="text" placeholder="Ex: 3" ng-model="tuna_id">
+        <input id="querySubmit" type="submit" value="Query" class="btn btn-primary" ng-click="queryRecord();">
+        <br> 
+	<br>
+      <table id="query_record" class="table" align="center">
+
+        <tr>
+          <th>Timestamp</th>
+          <th>Holder</th>
+          <th>Status <br></th>
+          <th>Vessel</th>
+        </tr>
+
+        <tr>
+          <td>{{query_record.timestamp}}</td>
+          <td>{{query_record.holder}}</td>
+          <td>{{query_record.status}}</td>
+          <td>{{query_record.vessel}}</td>
+        </tr>
+      </table>
+
+      </div> 		<div class="tab-pane" id="3">
+      <div class="form-group"> <br>
+        <label>Query All record</label>
+        <p><input id="queryAllrecord" type="submit" value="Query" class="btn btn-primary" ng-click="queryAllRecord()"></p>
+      </div>
+
+      <p id="succTX"> <h5 style="color:green;margin-bottom:2%" id="success_holder">Success! Tx ID: {{change_status}}</h5></p>
+
+      <table id="all_record" class="table" align="center">
+
+        <tr>
+          <th>ID</th>
+          <th>Timestamp</th>
+          <th>Holder</th>
+          <th>Status<br></th>
+          <th>Vessel</th>
+          <th>Action</th>
+        </tr>
+
+        <tr ng-repeat="record in all_record">
+          <td>{{record.Key}}<p></td>
+          <td>{{record.timestamp}}</td>
+          <td>{{record.holder}}</td>
+          <td>{{record.status}}</td>
+          <td>{{record.vessel}}</td>
+                <td ng-show="record.status=='New'">
+                <input id="changeStatus" type="submit" value="received" class="btn btn-primary" ng-click="changeStatus(record)"  onclick="stopIOT()" >
+                </td>
+        </tr>
+      </table>
+
+			</div>	
+	</div>
+   </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--
+
     <div id="body">
       <div class="form-group">
         <label>Query All record</label>
@@ -102,9 +211,9 @@
         <br>
         Enter catch id: <input id="recordId" class="form-control" type="text" placeholder="Ex: 11" ng-model="tuna.id">
         Enter name of vessel: <input class="form-control" type="text" placeholder="Ex: 0239L" ng-model="tuna.vessel">
-       <!-- Enter longitude: <input id="createName" class="form-control" type="text" placeholder="Ex: 28.012" ng-model="tuna.longitude"> 
+        Enter longitude: <input id="createName" class="form-control" type="text" placeholder="Ex: 28.012" ng-model="tuna.longitude"> 
         Enter latitude: <input id="createName" class="form-control" type="text" placeholder="Ex: 150.405" ng-model="tuna.latitude">
-        Enter timestamp: <input class="form-control" type="text" placeholder="Ex: 4982342301" ng-model="tuna.timestamp" disabled> -->
+        Enter timestamp: <input class="form-control" type="text" placeholder="Ex: 4982342301" ng-model="tuna.timestamp" disabled> 
         Enter name of holder: <input class="form-control" type="text" placeholder="Ex: Hansel" ng-model="tuna.holder">
         <input id="createSubmit" type="submit" value="Create" class="btn btn-primary" ng-click="addRecord()" onclick="startIOT()"> 
       </div>
@@ -133,7 +242,7 @@
           <td>{{query_record.vessel}}</td>
         </tr>
       </table>
-
+-->
      <!--
       <div class="form-group">
         <label>Change Tuna Holder</label><br>
@@ -143,8 +252,8 @@
         Enter name of new holder: <input class="form-control" name="assetSelect" placeholder="Ex: Barry" ng-model="holder.name">
         <input id="transferSubmit" type="submit" value="Change" class="btn btn-primary" ng-click="changeStatus()">
       </div>
-	-->
-    </div>
+	
+    </div> -->
   </body>
     <!-- requiring the angular page -->
     <script type="text/javascript" src="app.js"> </script>
