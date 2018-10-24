@@ -99,7 +99,7 @@ Will add test data (10 tuna catches)to our network
  */
 func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Response {
 	tuna := []Tuna{
-		Tuna{Vessel: "923F", Status: "New", Timestamp: "2018-10-22 15:02:44", Holder: "Miriam" , DeviceId: "Mydevice"  },
+		Tuna{Vessel: "923F", Status: "Fresh", Timestamp: "2018-10-22 15:02:44", Holder: "Miriam" , DeviceId: "Mydevice"  },
 	}
 	i := 0
 	for i < len(tuna) {

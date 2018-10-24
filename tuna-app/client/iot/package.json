@@ -12,7 +12,8 @@
                 "form-data": "^2.2.0",
                 "format": "^0.2.1",
                 "loglevel": "^1.4.0",
-                "mqtt": "^2.8.2"
+                "mqtt": "^2.8.2",
+        	"express-session": "^1.7.6"
         },
         "devDependencies": {
                 "babel": "^5.8.21",

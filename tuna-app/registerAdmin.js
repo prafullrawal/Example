@@ -41,7 +41,7 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
     };
     // be sure to change the http to https when the CA is running TLS enabled
     fabric_ca_client = new Fabric_CA_Client('http://localhost:7054', tlsOptions , 'ca.example.com', crypto_suite);
-console.log("1");
+
     // first check to see if the admin is already enrolled
     return fabric_client.getUserContext('admin', true);
 
@@ -51,7 +51,7 @@ console.log("1");
         admin_user = user_from_store;
         return null;
     } else {
-	console.log("1");
+
         // need to enroll it with CA server
         return fabric_ca_client.enroll({
           enrollmentID: 'admin',

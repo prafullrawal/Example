@@ -12,7 +12,9 @@ export MSYS_NO_PATHCONV=1
 
 docker-compose -f docker-compose.yml down --volume
 
-./stop.sh
+rm -rf ~/.hfc-key-store/*
+
+#./stop.sh
 
 #./teardown.sh
 

@@ -93,9 +93,9 @@ return{
 		});
 	},
 	add_record: function(req, res){
-	
-		IOTStatus.start_reading_temp(req);	
-	
+		
+		IOTStatus.start_reading_temp(req);
+		
 		console.log("submit record: ");
 
 		var array = req.params.tuna.split("-");
@@ -108,7 +108,7 @@ return{
 		var deviceId = "Mydevice";
 		var vessel = array[2]
 		var holder = array[1]
-		var status = "New";
+		var Rstatus = "New";
 
 
 		var fabric_client = new Fabric_Client();
@@ -157,7 +157,7 @@ return{
 		        //targets : --- letting this default to the peers assigned to the channel
 		        chaincodeId: 'mycc',
 		        fcn: 'addRecord',
-		        args: [key, vessel, status, timestamp, holder ,deviceId],
+		        args: [key, vessel, Rstatus, timestamp, holder ,deviceId],
 		        chainId: 'mychannel',
 		        txId: tx_id
 			};
@@ -330,8 +330,9 @@ return{
 	},
 	change_status: function(req, res){
 		
-		finalState =  IOTStatus.get_final_status(req,finalState);
-                
+	       var finalState =  IOTStatus.get_final_status(req,finalState);
+		console.log(finalState);                
+
 		console.log("changing holder of tuna catch: ");
 
 		//var array = req.params.holder.split("-");
