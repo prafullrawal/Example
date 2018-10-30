@@ -1,10 +1,10 @@
   {
 	"network-configs": {
-		"network-1": {
+		"net_basic": {
 			"version": "1.0",
 			"clients": {
-				"client-1": {
-					"tlsEnable": true,
+				"org1": {
+					"tlsEnable": false,
 					"organization": "Org1MSP",
 					"channel": "mychannel",
 					"credentialStore": {
@@ -36,26 +36,26 @@
 					"mspid": "Org1MSP",
 					"fullpath": false,
 					"adminPrivateKey": {
-						"path": "/education/LFS171x/fabric-material/basic-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore"
+						"path": "/home/golu/Example/basic-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore"
 					},
 					"signedCert": {
-						"path": "/education/LFS171x/fabric-material/basic-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts"
+						"path": "/home/golu/Example/basic-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts"
 					}
 				},
 				"OrdererMSP": {
 					"mspid": "OrdererMSP",
 					"adminPrivateKey": {
-						"path": "/education/LFS171x/fabric-material/basic-network/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp/keystore"
+						"path": "/home/golu/Example/basic-network/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp/keystore"
 					}
 				}
 			},
 			"peers": {
 				"peer0.org1.example.com": {
 					"tlsCACerts": {
-						"path": "/education/LFS171x/fabric-material/basic-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt"
+						"path": "/home/golu/Example/basic-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt"
 					},
-					"url": "grpcs://localhost:7051",
-					"eventUrl": "grpcs://localhost:7053",
+					"url": "grpc://localhost:7051",
+					"eventUrl": "grpc://localhost:7053",
 					"grpcOptions": {
 						"ssl-target-name-override": "peer0.org1.example.com"
 					}
@@ -63,12 +63,11 @@
 			},
 			"orderers": {
 				"orderer.example.com": {
-					"url": "grpcs://localhost:7050"
+					"url": "grpc://localhost:7050"
 				}
 			}
-		},
-		"network-2": {}
+		}
 	},
-	"configtxgenToolPath": "~/fabric-dev-servers/fabric-samples/bin",
+	"configtxgenToolPath": "~/education/Myapp/fabric-samples/bin/",
 	"license": "Apache-2.0"
 }
