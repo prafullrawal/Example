@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Hyperledger Fabric Tuna Application</title>
+      <link rel="icon" href="favicon.png" type="image/gif">
+      <!-- require jquery and bootstrap scripts -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+      <script src="./bootstrap-notify.js"></script>
+      <!-- adding style here -->
+      <style type="text/css">
+         header{
+         background-color: lightgray;
+         font-size:20px;
+         padding:15px;
+         }
+         header, .form-group{
+         margin-bottom: 3%;
+         }
+         .form-group{
+         width:50%;
+         }
+         #body{
+         margin-left:3%;
+         margin-right:3%;
+         }
+         .form-control{
+         margin: 8px;
+         }
+         #right_header{
+         width:20%;
+         font-size:15px;
+         margin-right:0px;
+         }
+         #left_header{
+         margin-left:0;
+         width:40%;
+         display:inline-block;
+         } 
+         #id {
+         width:49%;
+         display: inline-block;
+         }
+         table {
+         font-family: arial, sans-serif;
+         border-collapse: collapse;
+         width: 100%;
+         }
+         td, th {
+         border: 1px solid #dddddd;
+         text-align: left;
+         padding: 8px;
+         }
+         tr:nth-child(even) {
+         background-color: #dddddd;
+         }
+         .progress {
+          margin: 10px;
+          width: 1000px;
+        }
+      </style>
+   </head>
+   <body ng-app="application" ng-controller="appController">
+      <header>
+         <div id="left_header">Hyperledger Fabric supply chain Application</div>
+         <i id="right_header">Blockchain application</i>
+      </header>
+      <div class="container">
+         <h2>Supply chain Application with IOT integration</h2>
+     </div>
+     <br>
+	
+<div class="bd-example bd-example-tabs">
+  <div class="row">
+    <div class="col-2">
+      <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+        <a class="nav-link active show" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">Party-1</a>
+        <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-controls="v-pills-profile" aria-selected="false">Party-2</a>
+      </div>
+    </div>
+    <div class="col-7" >
+      <div class="tab-content" id="v-pills-tabContent">
+        <div class="tab-pane fade active show" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
+          
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Create record</a>
+                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Search record</a>
+                <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Dashboard</a>
+            </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+               <div class="form-group"> <br>
+                    <form name="submitRecord">
+                        Enter id : <input id="recordId" class="form-control" type="text" placeholder="Ex: 11" ng-model="tuna.id" ng-required="true"> 
+                        Enter name of vessel :<input id="vesselId" class="form-control" type="text" placeholder="Ex: 0239L" ng-model="tuna.vessel" ng-required="true"> 
+                        Enter name of holder :<input id="holderId" class="form-control" type="text" placeholder="Ex: Hansel" ng-model="tuna.holder" ng-required="true">
+                        <br>
+                        <input id="createSubmit" type="submit" value="Create" class="btn btn-outline-primary" ng-click="addRecord()">
+                    </form>
+                </div>
+
+            </div>
+            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+
+                <br>
+                <label>Query a Specific record</label>
+                <br>
+                <h5 style="color:red;margin-bottom:2%" id="error_query">Error: Please enter a valid Id</h5>
+                <input id="createName" class="form-control" type="text" placeholder="Ex: 3" ng-model="tuna_id">
+                <input id="querySubmit" type="submit" value="Query" class="btn btn-outline-primary" ng-click="queryRecord();">
+                <br>
+                <br>
+                <table id="query_record" class="table" align="center">
+                    <tr>
+                        <th>Id</th>
+                        <th>Timestamp</th>
+                        <th>Holder</th>
+                        <th>Status</th>
+                        <th>Vessel</th>
+                        <th>Action</th>
+                    </tr>
+                    <tr>
+                        <td>{{query_record.Key}}</td>
+                        <td >{{query_record.timestamp}}</td>
+                        <td>{{query_record.holder}}</td>
+                        <td>{{query_record.status}}</td>
+                        <td>{{query_record.vessel}}</td>
+                        <td>
+                            <!-- <span ng-show="query_record.status=='Waste'" class="badge badge-danger">Crossed Threashold Temperature</span> -->
+                            <span ng-show="query_record.ParcelStatus=='Delivered'" class="badge badge-success"> Reached </span>
+                            <input ng-show="query_record.ParcelStatus=='New'" id="sentItem" type="submit" value="Send" class="btn btn-outline-primary" ng-click="" onclick="sentItem()">
+                            <span ng-show="query_record.ParcelStatus=='Sent'" class="badge badge-info"> Item sent </span>
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+            <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+
+                <div class="form-group">
+                    <br>
+                    <label>Query All record</label>
+                    <p>
+                        <input id="queryAllrecord" type="submit" value="Query" class="btn btn-outline-primary" ng-click="queryAllRecord()">
+                    </p>
+                </div>
+                <!-- <p id="succTX">
+                    <h5 style="color:green;margin-bottom:2%" id="success_holder">Success! Tx ID: {{change_status}}</h5>
+                </p> -->
+                <table id="all_record" class="table" align="center">
+                    <tr>
+                        <th>ID</th>
+                        <th>Timestamp</th>
+                        <th>Holder</th>
+                        <th>Status</th>
+                        <th>Vessel</th>
+                        <th>Action</th>
+                    </tr>
+                    <tr ng-repeat="record in all_record">
+                        <td>{{record.Key}} </td>
+                        <td>{{record.timestamp}}</td>
+                        <td>{{record.holder}}</td>
+                        <td>{{record.status}}</td>
+                        <td>{{record.vessel}}</td>
+                        <td>
+                            <span ng-show="record.status=='Waste'" class="badge badge-danger">Crossed Threashold Temperature </span>
+                            <span ng-show="record.status=='Fresh'" class="badge badge-success"> Delivered </span>
+                            <!-- <span ng-show="record.status=='New'" class="badge badge-warning">Item to be sent or </span> -->
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        </div>
+        <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+         <nav>
+            <div class="nav nav-tabs" id="nav-tab1" role="tablist">
+           	<a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home1" role="tab" aria-controls="nav-home" aria-selected="true">Search record</a>
+                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile1" role="tab" aria-controls="nav-profile" aria-selected="false">Dashboard</a> 
+	   </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-home1" role="tabpanel" aria-labelledby="nav-home-tab">
+            <br>
+                <label>Query a Specific record</label>
+                <br>
+                <h5 style="color:red;margin-bottom:2%" id="error_query_1">Error: Please enter a valid Id</h5>
+                <input id="createName_1" class="form-control" type="text" placeholder="Ex: 3" ng-model="record_id">
+                <input id="querySubmit_1" type="submit" value="Query" class="btn btn-outline-primary" ng-click="queryRecord_1();">
+                <br>
+                <br>
+                <table id="query_record_1" class="table" align="center">
+                    <tr>
+                        <th>Id</th>
+                        <th>Timestamp</th>
+                        <th>Holder</th>
+                        <th>Status </th>
+                        <th>Vessel</th>
+                        <th>Action</th>
+                    </tr>
+                    <tr>
+                        <td>{{query_record_1.Key}}</td>
+                        <td>{{query_record_1.timestamp}}</td>
+                        <td>{{query_record_1.holder}}</td>
+                        <td>{{query_record_1.status}}</td>
+                        <td>{{query_record_1.vessel}}</td>
+                        <td>
+                            <span ng-show="query_record_1.ParcelStatus=='Delivered'" class="badge badge-success">Received</span>
+                            <span ng-show="query_record_1.ParcelStatus=='New'" class="badge badge-info"> New entry found item yet be sent by party-1</span>
+                            <input ng-show="query_record_1.ParcelStatus=='Sent'" id="receiveItem" type="submit" value="Received" class="btn btn-outline-primary" ng-click="receiveItem(query_record_1)" onclick="stopIOT()">
+                        </td>
+                    </tr>
+                </table>
+        </div>
+        <div class="tab-pane fade" id="nav-profile1" role="tabpanel" aria-labelledby="nav-profile-tab">
+                
+                <div class="form-group">
+                        <br>
+                        <label>Query All record</label>
+                        <p>
+                            <input id="queryAllrecord_1" type="submit" value="Query" class="btn btn-outline-primary" ng-click="queryAllRecord_1()">
+                        </p>
+                    </div>
+                            <!-- <p id="succTX_1">
+                                    <h5 style="color:rgb(0, 112, 0);margin-bottom:2%" id="success_holder_1">Success! Tx ID: {{change_status}}</h5>
+                            </p> -->
+                    <table id="all_record_1" class="table" align="center">
+                        <tr>
+                            <th>ID</th>
+                            <th>Timestamp</th>
+                            <th>Holder</th>
+                            <th>Status</th>
+                            <th>Vessel</th>
+                            <th>Action</th>
+                        </tr>
+                        <tr ng-repeat="record_1 in all_record_1">
+                            <td>{{record_1.Key}}</td>
+                            <td>{{record_1.timestamp}}</td>
+                            <td>{{record_1.holder}}</td>
+                            <td>{{record_1.status}}</td>
+                            <td>{{record_1.vessel}}</td>
+                            <td>
+                                <input ng-show="record_1.status=='New'" id="changeStatus_1" type="submit" value="confirm" class="btn btn-outline-primary" ng-click="changeStatus(record_1)" onclick="stopIOT()">
+                                <span ng-show="record_1.status=='Waste'" class="badge badge-danger">Crossed Threashold Temperature </span>
+                                <span ng-show="record_1.status=='Fresh'" class="badge badge-success"> Received </span>
+                            </td>
+                        </tr>
+                    </table>
+            </div>
+          </div> 
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- requiring the angular page -->
+   <script type="text/javascript" src="app.js"> </script>
+   <script type="text/javascript" src="./iot/script.js"></script>
+   <script type="text/javascript"  src="./iot/mqttws31.js"></script>
+   <script>
+
+    
+    function startReadIOTApp(callback) {
+        var itemId = $('#createName').val();
+        angular.element(document.getElementById('query_record')).scope().startReadingTempIOT(itemId);
+        console.log('started reading temp');
+        callback();
+    }
+
+    function sentItemfunction(callback) {
+        var itemId = $('#createName').val();
+        angular.element(document.getElementById('query_record')).scope().sentItem(itemId);
+        console.log('updating item sent');
+        callback();
+    }
+
+
+    function sentItem(){
+        sentItemfunction(function() {
+            startReadIOTApp(function() {
+           // printList(callback);
+            });
+        });
+    }
+
+    $('#sentItem').click(function(){
+        var btn = $(this);
+        btn.prop('disabled', true);
+        setTimeout(function(){
+        btn.prop('disabled', false);
+        }, 10*1000);
+    }); 
+
+	$('#myTab a').on('click', function (e) {
+ 		 e.preventDefault()
+		  $(this).tab('show')
+    });
+   </script>	    
+</html>
