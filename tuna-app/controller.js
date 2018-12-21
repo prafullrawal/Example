@@ -23,12 +23,17 @@ return{
 	get_all_record: function(req, res){
 	
 		console.log("getting all tuna from database: ");
+		
+		var data = req.params.channelUserPort.split('+')	
+		var channelName = data[0]
+		var userName = data[1]
+		var port = data[2]
 
 		var fabric_client = new Fabric_Client();
 
 		// setup the fabric network
-		var channel = fabric_client.newChannel('mychannel');
-		var peer = fabric_client.newPeer('grpc://localhost:7051');
+		var channel = fabric_client.newChannel(channelName);
+		var peer = fabric_client.newPeer('grpc://localhost:'+port);
 
 		//var peer = fabric_client.newPeer('grpcs://localhost:7051',{
 		//	pem:'/education/LFS171x/fabric-material/basic-network/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem'
@@ -55,13 +60,13 @@ return{
 		    fabric_client.setCryptoSuite(crypto_suite);
 
 		    // get the enrolled user from persistence, this user will sign all requests
-		    return fabric_client.getUserContext('user1', true);
+		    return fabric_client.getUserContext(userName, true);
 		}).then((user_from_store) => {
 		    if (user_from_store && user_from_store.isEnrolled()) {
-		        console.log('Successfully loaded user1 from persistence');
+		        console.log('Successfully loaded '+userName+' from persistence');
 		        member_user = user_from_store;
 		    } else {
-		        throw new Error('Failed to get user1.... run registerUser.js');
+		        throw new Error('Failed to get '+userName);
 		    }
 
 		    // queryAllRecord - requires no arguments , ex: args: [''],
@@ -99,11 +104,14 @@ return{
 		var timestamp1 = dateIST.toLocaleString();
 		var timestamp1 = timestamp1.replace(',','');
 		
-		var key = array[0]		
+		var key = Date.now();		
 		var timestamp = timestamp1;
 		var deviceId = "Mydevice";
 		var vessel = array[2]
-		var holder = array[1]
+		var channleholder = array[1]
+                var arr = channleholder.toString().split("+");
+		var holder = arr[1]
+		var channel = arr[0]	
 		var location = array[3]
 		var Rstatus = "New";
 		var Pstatus = "New";
@@ -112,7 +120,7 @@ return{
 		var fabric_client = new Fabric_Client();
 
 		// setup the fabric network
-		var channel = fabric_client.newChannel('mychannel');
+		var channel = fabric_client.newChannel(channel);
 		var peer = fabric_client.newPeer('grpc://localhost:7051');
 		channel.addPeer(peer);
 		var order = fabric_client.newOrderer('grpc://localhost:7050')
@@ -136,7 +144,7 @@ return{
 		    fabric_client.setCryptoSuite(crypto_suite);
 
 		    // get the enrolled user from persistence, this user will sign all requests
-		    return fabric_client.getUserContext('user1', true);
+		    return fabric_client.getUserContext('user', true);
 		}).then((user_from_store) => {
 		    if (user_from_store && user_from_store.isEnrolled()) {
 		        console.log('Successfully loaded user1 from persistence');
@@ -156,7 +164,7 @@ return{
 		        chaincodeId: 'mycc',
 		        fcn: 'addRecord',
 		        args: [key, vessel, Rstatus, timestamp, holder ,deviceId ,Pstatus,location],
-		        chainId: 'mychannel',
+		        chainId: 'firstchannel',
 		        txId: tx_id
 			};
 			

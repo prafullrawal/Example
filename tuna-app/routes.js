@@ -21,7 +21,7 @@ module.exports = function(app){
     assests.add_record(req, res);
   });
 
-  app.get('/get_all_record?', function(req, res){
+  app.get('/get_all_record/:channelUserPort?', function(req, res){
     assests.get_all_record(req, res);  
   });
 

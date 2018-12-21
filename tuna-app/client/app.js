@@ -62,14 +62,20 @@ app.controller('appController', function($scope, appFactory){
 	// start first party //
 
 	$scope.queryAllRecord = function(){
-	
+		var array = [];	
 		$('#cover-spin').show(0);	
-
-		appFactory.queryAllRecord(function(data){
+		for(var i=0;i<2;i++){
+		if(i=='0')
+		var channelUserPort = 'firstchannel+user+7051';	
+		else
+		var channelUserPort = 'secondchannel+user+7051';
+	
+		appFactory.queryAllRecord(channelUserPort,function(data){
 
 		$('#cover-spin').hide(0);
-
-			var array = [];
+			
+			console.log(data);	
+		
 			for (var i = 0; i < data.length; i++){
 				parseInt(data[i].Key);
 				data[i].Record.Key = parseInt(data[i].Key);
@@ -79,8 +85,9 @@ app.controller('appController', function($scope, appFactory){
 			array.sort(function(a, b) {
 			    return parseFloat(a.Key) - parseFloat(b.Key);
 			});
-			$scope.all_record = array;
 		});
+		}
+		$scope.all_record = array;
 	}
 
 	$scope.queryRecord = function(){
@@ -94,7 +101,7 @@ app.controller('appController', function($scope, appFactory){
 			 $('#cover-spin').hide(0);
 				
 			$scope.query_record = data;
-
+			
 			if ($scope.query_record == "Could not locate tuna"){
 				$("#error_query").show();
 			} else{
@@ -228,10 +235,10 @@ app.controller('appController', function($scope, appFactory){
 		});
 	}
 
-	$scope.queryAllRecord_1 = function(){
+	$scope.queryAllRecord_1 = function(channelUserPort){
 		$('#cover-spin').show(0);
-				appFactory.queryAllRecord(function(data){
-						 $('#cover-spin').hide(0);	
+				appFactory.queryAllRecord(channelUserPort,function(data){
+						$('#cover-spin').hide(0);	
 						var array = [];
 						for (var i = 0; i < data.length; i++){
 								parseInt(data[i].Key);
@@ -242,7 +249,19 @@ app.controller('appController', function($scope, appFactory){
 						array.sort(function(a, b) {
 							return parseFloat(a.Key) - parseFloat(b.Key);
 						});
-						$scope.all_record_1 = array;
+						if(channelUserPort == 'firstchannel+user2+8051')
+						{
+							$scope.all_record_Miriam = array ;
+							
+						}
+						if(channelUserPort == 'secondchannel+user3+9051')
+						{
+							$scope.all_record_1 = array ;
+						}	
+						else
+						{
+							$scope.all_record_Alice = array ;
+						}
 				});
 	}
 
@@ -250,7 +269,6 @@ app.controller('appController', function($scope, appFactory){
 		var req = record.Key;
 
 		$('#cover-spin').show(0);	
-		console.log("spinner should print");
 		appFactory.receiveItem(req, function(data){
 		$scope.change_status = data;
 
@@ -335,8 +353,8 @@ app.factory('appFactory', function($http){
 		});
 	}
 
-   	factory.queryAllRecord = function(callback){
-    	$http.get('/get_all_record?/').success(function(output){
+   	factory.queryAllRecord = function(channelUserPort,callback){
+    	$http.get('/get_all_record/'+channelUserPort+'?').success(function(output){
 			callback(output)
 		});
 	}
@@ -349,7 +367,9 @@ app.factory('appFactory', function($http){
 
 	factory.addRecord = function(data, callback){
         	
-		data.location = data.longitude + ", "+ data.latitude;	
+		//data.location = data.longitude + ", "+ data.latitude;	
+		
+		data.location = "13.052313,77.624934";
 	
 		var tuna = data.id + "-" + data.holder + "-" + data.vessel + "-" +  data.location;
 
