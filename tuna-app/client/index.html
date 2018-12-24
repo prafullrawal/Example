@@ -145,7 +145,7 @@
 				</div>
 			<br>
                         <form name="submitRecord" class="ng-pristine ng-invalid ng-invalid-required">
-		           <label> Enter price :</label> <input id="recordId" class="form-control col-md-6 ng-pristine ng-untouched ng-invalid ng-invalid-required" type="text" placeholder="Ex: 11$" ng-model="tuna.id" ng-required="true" required="required"><br>
+		           <label> Enter price :</label> <input id="recordId" class="form-control col-md-6 ng-pristine ng-untouched ng-invalid ng-invalid-required" type="text" placeholder="Ex: 11$" ng-model="tuna.price" ng-required="true" required="required"><br>
                            <label> Enter name of vessel :</label><input id="vesselId" class="form-control col-md-6 ng-pristine ng-untouched ng-invalid ng-invalid-required" type="text" placeholder="Ex: 0239L" ng-model="tuna.vessel" ng-required="true" required="required"><br>
 			   <label> Enter longitude: </label><input id="longitudeId" class="form-control col-md-6  ng-pristine ng-untouched ng-invalid ng-invalid-required" type="text" value="13.052313" disabled  ng-required="true" required="required"><br> 
                            <label> Enter latitude:</label> <input id="latitudeId" class="form-control col-md-6 ng-pristine ng-untouched ng-invalid ng-invalid-required"  type="text" value="77.624934" disabled  ng-required="true" required="required"><br>
@@ -169,12 +169,12 @@
 		    <br> <label> Please select  name of Distributor :</label>
                     <br>
 		    <div class="row">
-                                <select class="form-control col-md-6" ng-model="tuna.id">
+                                <select class="form-control col-md-6" ng-model="ChannelUserPort">
                                          <option selected value="firstchannel+user+7051"> Miriam </option>
                                          <option value="secondchannel+user+7051"> Bob </option>
                                 </select>
 			<br> &emsp;
-		   	 <input id="querySubmit" type="submit" value="Query" class="btn btn-outline-primary" ng-click="queryAllRecord_1(tuna.id);">
+		   	 <input id="querySubmit" type="submit" value="Query" class="btn btn-outline-primary" ng-click="queryAllRecord_1(ChannelUserPort);">
                     </div>	
 		    <br><br>
                     <table id="query_record" class="table table-striped table-bordered" align="center">
@@ -187,7 +187,7 @@
 			    <th>Catch Location <br>(Longitude, Latitude)</th>
                             <th>Action</th>
                         </tr>
-                        <tr ng-repeat="query_record in all_record_Alice | filter:ParcelStatus='New'">
+                        <tr ng-repeat="query_record in all_record_Alice">
                             <td>{{query_record.Key}}</td>
                             <td>{{query_record.timestamp}}</td>
                             <td>{{query_record.holder}}</td>
@@ -200,11 +200,11 @@
                                 <span ng-show="query_record.ParcelStatus=='Delivered'" class="badge badge-success ng-hide"> Reached </span>
                                 <input ng-show="query_record.ParcelStatus=='New'" id="sentItem" type="submit" value="Send" class="btn btn-outline-primary ng-hide" ng-click="" onclick="sentItem()">
                                 <span ng-show="query_record.ParcelStatus=='Sent'" class="badge badge-info ng-hide"> Item sent </span> -->
-			        <input ng-show="query_record.ParcelStatus=='New'" type="checkbox" ng-model="item.selected">
+			       <input ng-show="query_record.ParcelStatus=='New'" type="checkbox" ng-model="query_record.selected" ng-true-value="'Y'" ng-false-value="'N'">
                             </td>
                         </tr>
                     </tbody></table>
-			<input align="center"  id="sentItem" type="submit" value="Send" class="btn btn-outline-primary" ng-click="" onclick="sentItem()">	
+			<input align="center"  id="sentItem" type="submit" value="Send" class="btn btn-outline-primary" ng-click="sentItem(all_record_Alice)" onclick="">	
                 </div>
                 <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
 
@@ -269,36 +269,36 @@
 				  Receive the shipment for specific catch Id.
 		    </div>	
 		    <br> 
-                  <label>Query a Specific catch id</label>
+	  		<!-- <label>Query a Specific catch id</label> -->
                     <br>
 			<h5 style="color: red; margin-bottom: 2%; display: none;" id="error_query_1">Error: Please enter a valid Id</h5>
 			<div class="row">
                    
                     <input id="createName_1" class="form-control col-md-6 ng-pristine ng-untouched ng-valid" type="text" placeholder="Ex: 3" ng-model="record_id"> <br> &emsp;
-                    <input id="querySubmit_1" type="submit" value="Query" class="btn btn-outline-primary" ng-click="queryRecord_1();"> </div>
+                    <input id="querySubmit_1" type="submit" value="Refresh" class="btn btn-outline-primary" ng-click="queryRecord_1('user1+firstchannel+8053');"> </div>
                     <br><br>
                     <table id="query_record_1" class="table table-striped table-bordered" align="center">
-                        <tbody><tr>
+                	<tr>
                             <th>Id</th>
                             <th>Timestamp</th>
-                            <th>Supplier</th>
+                            <th>Holder</th>
                             <th>Status </th>
                             <th>Vessel</th>
 			    <th>Catch Location <br>(Longitude, Latitude)</th> 
                             <th>Action</th>
                         </tr>
                         <tr>
-                            <td class="ng-binding"></td>
-                            <td class="ng-binding"></td>
-                            <td class="ng-binding"></td>
-                            <td class="ng-binding"></td>
-                            <td class="ng-binding"></td>
-			    <td class="ng-binding"></td>
+                            <td>{{query_record_1.Key}}</td>
+                            <td>{{query_record_1.timestamp}}</td>
+                            <td>{{query_record_1.holder}}</td>
+                            <td>{{query_record_1.status}}</td>
+                            <td>{{query_record_1.vessel}}</td>
+			    <td>{{query_record_1.location}}</td>        
                             <td>
-                                <span ng-show="query_record_1.ParcelStatus=='Delivered'" class="badge badge-success ng-hide">Received</span>
-                                <span ng-show="query_record_1.ParcelStatus=='New'" class="badge badge-info ng-hide"> New entry found item yet be sent</span>
-                                <!-- ngIf: query_record_1.ParcelStatus=='Sent' && query_record_1.status=='New' -->
-				<!-- ngIf: query_record_1.ParcelStatus=='Sent' && query_record_1.status=='Waste' -->
+				<span ng-show="query_record_1.ParcelStatus=='Delivered'" class="badge badge-success">Received</span>
+                                <span ng-show="query_record_1.ParcelStatus=='New'" class="badge badge-info"> New entry found item yet be sent</span>
+                                <input ng-if="query_record_1.ParcelStatus=='Sent' && query_record_1.status=='New'" id="receiveItem" type="submit" value="Received" class="btn btn-outline-primary" ng-click="receiveItem(query_record_1)" onclick="stopIOT()">
+				<input ng-if="query_record_1.ParcelStatus=='Sent' && query_record_1.status=='Waste'" id="receiveItem" type="submit" value="Received" class="btn btn-outline-primary" ng-click="receiveItem(query_record_1)" disabled>
                             </td>
                         </tr>
                     </tbody></table>

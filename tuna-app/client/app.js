@@ -141,11 +141,24 @@ app.controller('appController', function($scope, appFactory){
 		}	
 	}
 
-	$scope.sentItem = function(record){
+	$scope.sentItem = function(data){
 
-		var req = $scope.tuna_id;
+	console.log(data)
+	var arr = [];	
+	data.forEach(function(element) {
+		if(element.selected=='Y'){
+			arr.push(element);
+		}
+	});
+
+	
+     
+    console.log(arr);	
+
+	//	var req = $scope.tuna_id;
+				
 		$('#cover-spin').show(0);
-		appFactory.sentItem(req, function(data){
+		appFactory.sentItem(arr, function(data){
 			$scope.sentItem_status = data;
 			 $('#cover-spin').hide(0);
 			if ($scope.sentItem_status == "Error: no record found"){
@@ -216,12 +229,12 @@ app.controller('appController', function($scope, appFactory){
 
 	// Start second party //
 
-	$scope.queryRecord_1 = function(){
+	$scope.queryRecord_1 = function(reqData){
 		
 		$('#cover-spin').show(0);
-		var id = $scope.record_id;
+		
 
-		appFactory.queryRecord(id, function(data){
+		appFactory.queryRecord(reqData, function(data){
 
 				$scope.query_record_1 = data;
 				 $('#cover-spin').hide(0);
@@ -359,8 +372,8 @@ app.factory('appFactory', function($http){
 		});
 	}
 
-	factory.queryRecord = function(id, callback){
-    	$http.get('/get_record/'+id+'?').success(function(output){
+	factory.queryRecord = function(reqData, callback){
+    	$http.get('/get_record/'+reqData+'?').success(function(output){
 			callback(output)
 		});
 	}
@@ -389,8 +402,8 @@ app.factory('appFactory', function($http){
 		});
 	}
 
-	factory.sentItem = function(id, callback){
-		$http.get('/sent_item/'+id+'?').success(function(output){
+	factory.sentItem = function(arr, callback){
+		$http.get('/sent_item/'+arr+'?').success(function(output){
 			callback(output)
 		});
 	}

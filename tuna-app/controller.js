@@ -268,11 +268,15 @@ return{
 	get_record: function(req, res){
 
 		var fabric_client = new Fabric_Client();
-		var key = req.params.id
+		var key = req.params.reqData.split('+')
+                var channelName = data[0]
+                var userName = data[1]
+                var port = data[2]
+
 
 		// setup the fabric network
-		var channel = fabric_client.newChannel('mychannel');
-		var peer = fabric_client.newPeer('grpc://localhost:7051');
+		var channel = fabric_client.newChannel(channelName);
+		var peer = fabric_client.newPeer('grpc://localhost:'+port);
 		channel.addPeer(peer);
 
 		//
@@ -294,7 +298,7 @@ return{
 		    fabric_client.setCryptoSuite(crypto_suite);
 
 		    // get the enrolled user from persistence, this user will sign all requests
-		    return fabric_client.getUserContext('user1', true);
+		    return fabric_client.getUserContext(userName, true);
 		}).then((user_from_store) => {
 		    if (user_from_store && user_from_store.isEnrolled()) {
 		        console.log('Successfully loaded user1 from persistence');
@@ -502,16 +506,24 @@ return{
 		
 		//var array = req.params.holder.split("-");
 
-		var key = req.params.record_id;
+		var dateUTC = new Date(); var dateUTC = dateUTC.getTime(); var dateIST = new Date(dateUTC); dateIST.setHours(dateIST.getHours() + 5);  dateIST.setMinutes(dateIST.getMinutes() + 30);
+                var timestamp1 = dateIST.toLocaleString();
+                var timestamp1 = timestamp1.replace(',','');
 		
-		var parcelRecordStatus =  "Sent" ;  //resIOT.state;
+		var key = Date.now();
+                var tuna = req.params.arr; 
+		var senttimestamp = timestamp1;
+		var receivetimestamp = '';		
+		
+		
+	//	var parcelRecordStatus =  "Sent" ;  //resIOT.state;
 
-		console.log("changing Parcelstatus of record : " + parcelRecordStatus);
+		console.log("sending consiment with id"+ key );
 
 		var fabric_client = new Fabric_Client();
 
 		// setup the fabric network
-		var channel = fabric_client.newChannel('mychannel');
+		var channel = fabric_client.newChannel('firstchannel');
 		var peer = fabric_client.newPeer('grpc://localhost:7051');
 		channel.addPeer(peer);
 		var order = fabric_client.newOrderer('grpc://localhost:7050')
@@ -535,13 +547,13 @@ return{
 		    fabric_client.setCryptoSuite(crypto_suite);
 
 		    // get the enrolled user from persistence, this user will sign all requests
-		    return fabric_client.getUserContext('user1', true);
+		    return fabric_client.getUserContext('user', true);
 		}).then((user_from_store) => {
 		    if (user_from_store && user_from_store.isEnrolled()) {
-		        console.log('Successfully loaded user1 from persistence');
+		        console.log('Successfully loaded user from persistence');
 		        member_user = user_from_store;
 		    } else {
-		        throw new Error('Failed to get user1.... run registerUser.js');
+		        throw new Error('Failed to get user.... run registerUser.js');
 		    }
 
 		    // get a transaction id object based on the current user assigned to fabric client
@@ -553,9 +565,9 @@ return{
 		    var request = {
 		        //targets : --- letting this default to the peers assigned to the channel
 		        chaincodeId: 'mycc',
-		        fcn: 'updateParcelRecordStatus',
-		        args: [key, parcelRecordStatus],
-		        chainId: 'mychannel',
+		        fcn: 'sentshipment',
+		        args: [key,tuna,senttimestamp,receivetimestamp],
+		        chainId: 'firstchannel',
 		        txId: tx_id
 		    };
 

@@ -41,6 +41,13 @@ type Tuna struct {
 	Location  string `json:"location"`
 }
 
+type Shipment struct{
+	Tuna []Tuna `json:"tuna"`
+	ShipmentSentTimestamp string `json: "shipmentsenttimestamp"`
+	ShipmentReceiveTimestamp string `json: "shipmentreceivetimestamp"`
+	ShipmentStatus string `json: "shipmentstatus"`
+}
+
 /* 
 * The Init method *
   called when the Smart Contract "tuna-chaincode" is instantiated by the network
@@ -74,6 +81,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.updateRecordStatus(APIstub, args)
 	}else if function == "updateParcelRecordStatus" {
 		return s.updateParcelRecordStatus(APIstub, args)
+	}else if function == "sentshipment" {
+		return s.sentshipment(APIstub, args)
 	}
 
 	return shim.Error("Invalid Smart Contract function name.")
@@ -114,8 +123,47 @@ func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Respo
 		i = i + 1
 	}
 
+	shipment := []Shipment{
+		Shipment{Tuna:  tuna , ShipmentSentTimestamp: "2018-10-22 15:02:44", ShipmentReceiveTimestamp: "2018-10-22 15:02:44", ShipmentStatus: ""},
+	}
+
+	j := 0
+	for j < len(shipment) {
+		fmt.Println("j is ", j)
+		shipmentAsBytes, _ := json.Marshal(shipment[j])
+		APIstub.PutState(strconv.Itoa(j+1), shipmentAsBytes)
+		fmt.Println("Added", shipment[j])
+		j = j + 1
+	}
+
 	return shim.Success(nil)
 }
+
+
+// create shipment 
+
+func (s *SmartContract) sentshipment(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+
+	if len(args) != 5 {
+		return shim.Error("Incorrect number of arguments. Expecting 5")
+	}
+
+	var Tuna []tuna;
+
+	tuna = JSON.stringify(args[1]);
+
+	var shipment = Shipment{ Tuna: tuna, ShipmentSentTimestamp: args[2], ShipmentReceiveTimestamp: args[3], ShipmentStatus: args[4]}
+
+	shipmentAsBytes, _ := json.Marshal(shipment)
+	err := APIstub.PutState(args[0], shipmentAsBytes)
+	if err != nil {
+		return shim.Error(fmt.Sprintf("Failed to record shipment catch: %s", args[0]))
+	}
+
+	return shim.Success(nil)
+}
+
+
 
 /*
  * The addRecord method *

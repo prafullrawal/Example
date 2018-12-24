@@ -13,7 +13,7 @@ var dbForLogin = cloudant.db.use("iotlogindetails");
 
 module.exports = function(app){
 
-  app.get('/get_record/:id?', function(req, res){
+  app.get('/get_record/:reqData?', function(req, res){
     assests.get_record(req, res);
   });
 
