@@ -104,13 +104,15 @@ return{
 		var timestamp1 = dateIST.toLocaleString();
 		var timestamp1 = timestamp1.replace(',','');
 		
-		var key = Date.now();		
+		var key = Date.now().toString();		
 		var timestamp = timestamp1;
 		var deviceId = "Mydevice";
+		var price = array[0]
 		var vessel = array[2]
 		var channleholder = array[1]
                 var arr = channleholder.toString().split("+");
-		var holder = arr[1]
+		var supplier = "Alice"
+		var distributor = arr[1]
 		var channel = arr[0]	
 		var location = array[3]
 		var Rstatus = "New";
@@ -144,7 +146,7 @@ return{
 		    fabric_client.setCryptoSuite(crypto_suite);
 
 		    // get the enrolled user from persistence, this user will sign all requests
-		    return fabric_client.getUserContext('user', true);
+		    return fabric_client.getUserContext('user1', true);
 		}).then((user_from_store) => {
 		    if (user_from_store && user_from_store.isEnrolled()) {
 		        console.log('Successfully loaded user1 from persistence');
@@ -163,8 +165,8 @@ return{
 		        //targets : --- letting this default to the peers assigned to the channel
 		        chaincodeId: 'mycc',
 		        fcn: 'addRecord',
-		        args: [key, vessel, Rstatus, timestamp, holder ,deviceId ,Pstatus,location],
-		        chainId: 'firstchannel',
+		        args: [key, vessel, Rstatus, timestamp, deviceId ,location , price,supplier,distributor],
+		        chainId: channel,
 		        txId: tx_id
 			};
 			
@@ -268,7 +270,7 @@ return{
 	get_record: function(req, res){
 
 		var fabric_client = new Fabric_Client();
-		var key = req.params.reqData.split('+')
+		var data = req.params.reqData.split('+')
                 var channelName = data[0]
                 var userName = data[1]
                 var port = data[2]
@@ -301,18 +303,18 @@ return{
 		    return fabric_client.getUserContext(userName, true);
 		}).then((user_from_store) => {
 		    if (user_from_store && user_from_store.isEnrolled()) {
-		        console.log('Successfully loaded user1 from persistence');
+		        console.log('Successfully loaded '+userName+' from persistence');
 		        member_user = user_from_store;
 		    } else {
-		        throw new Error('Failed to get user1.... run registerUser.js');
+		        throw new Error('Failed to get '+userName+'.... run registerUser.js');
 		    }
 
 		    // queryRecord - requires 1 argument, ex: args: ['4'],
 		    const request = {
 		        chaincodeId: 'mycc',
 		        txId: tx_id,
-		        fcn: 'queryRecord',
-		        args: [key]
+		        fcn: 'queryAllRecord',
+		        args: []
 		    };
 
 		    // send the query proposal to the peer
@@ -504,26 +506,25 @@ return{
 	},
 	sent_item: function(req, res){
 		
-		//var array = req.params.holder.split("-");
+		var array = req.params.shipment.split("-");
 
-		var dateUTC = new Date(); var dateUTC = dateUTC.getTime(); var dateIST = new Date(dateUTC); dateIST.setHours(dateIST.getHours() + 5);  dateIST.setMinutes(dateIST.getMinutes() + 30);
-                var timestamp1 = dateIST.toLocaleString();
-                var timestamp1 = timestamp1.replace(',','');
 		
-		var key = Date.now();
-                var tuna = req.params.arr; 
-		var senttimestamp = timestamp1;
-		var receivetimestamp = '';		
-		
+		var key = array[0]
+		var senttimestamp = array[1]
+	        var shipmentid = array[2]
+		var shipmentstatus = "Sent";
+		var data = array[3].split("+");
+		var channelName = data[0]
+	
+		senttimestamp = senttimestamp.replace(/_/g,'-');	
 		
 	//	var parcelRecordStatus =  "Sent" ;  //resIOT.state;
 
-		console.log("sending consiment with id"+ key );
 
 		var fabric_client = new Fabric_Client();
 
 		// setup the fabric network
-		var channel = fabric_client.newChannel('firstchannel');
+		var channel = fabric_client.newChannel(channelName);
 		var peer = fabric_client.newPeer('grpc://localhost:7051');
 		channel.addPeer(peer);
 		var order = fabric_client.newOrderer('grpc://localhost:7050')
@@ -547,7 +548,7 @@ return{
 		    fabric_client.setCryptoSuite(crypto_suite);
 
 		    // get the enrolled user from persistence, this user will sign all requests
-		    return fabric_client.getUserContext('user', true);
+		    return fabric_client.getUserContext('user1', true);
 		}).then((user_from_store) => {
 		    if (user_from_store && user_from_store.isEnrolled()) {
 		        console.log('Successfully loaded user from persistence');
@@ -565,11 +566,13 @@ return{
 		    var request = {
 		        //targets : --- letting this default to the peers assigned to the channel
 		        chaincodeId: 'mycc',
-		        fcn: 'sentshipment',
-		        args: [key,tuna,senttimestamp,receivetimestamp],
-		        chainId: 'firstchannel',
+		        fcn: 'updateShipmentSentStatus',
+		        args: [key,shipmentid ,shipmentstatus,senttimestamp],
+		        chainId: channelName,
 		        txId: tx_id
 		    };
+			
+		    
 
 		    // send the transaction proposal to the peers
 		    return channel.sendTransactionProposal(request);
@@ -678,7 +681,10 @@ return{
 		IOTStatus.Item_received(req,res);
 			
 		//var array = req.params.holder.split("-");
-		var parcelRecordStatus =  "Delivered" ;  //resIOT.state;
+		var key = ""
+		var shipmentid = "";
+		var shipmentstatus =  "Delivered" ;  //resIOT.state;
+		var shipmentreceivetimestamp = "";
 
 		console.log("changing parcel state to: " + parcelRecordStatus +"for record id :"+ key);
 

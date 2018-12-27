@@ -34,19 +34,19 @@ Structure tags are used by encoding/json library
 type Tuna struct {
 	Vessel string `json:"vessel"`
 	Status  string `json:"status"`
+	Price string `json:"price"`
 	Timestamp string `json:"timestamp"`
-	Holder  string `json:"holder"`
-	DeviceId  string `json:"deviceId"`
-	ParcelStatus string `json: parcelStatus`
+	Supplier  string `json:"Supplier"`
+	Distributor string `json:"distributor"`
+	DeviceId  string `json:"deviceid"`
 	Location  string `json:"location"`
+	ShipmentId string `json:"shipmentid"`
+	ShipmentStatus string `json:"shipmentstatus"`
+	ShipmentSentTimestamp string `json: "shipmentsenttimestamp"`
+        ShipmentReceiveTimestamp string `json: "shipmentreceivetimestamp"`
+
 }
 
-type Shipment struct{
-	Tuna []Tuna `json:"tuna"`
-	ShipmentSentTimestamp string `json: "shipmentsenttimestamp"`
-	ShipmentReceiveTimestamp string `json: "shipmentreceivetimestamp"`
-	ShipmentStatus string `json: "shipmentstatus"`
-}
 
 /* 
 * The Init method *
@@ -79,11 +79,12 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.queryAllRecord(APIstub)
 	} else if function == "updateRecordStatus" {
 		return s.updateRecordStatus(APIstub, args)
-	}else if function == "updateParcelRecordStatus" {
-		return s.updateParcelRecordStatus(APIstub, args)
-	}else if function == "sentshipment" {
-		return s.sentshipment(APIstub, args)
-	}
+	}else if function == "updateShipmentSentStatus" {
+		return s.updateShipmentSentStatus(APIstub, args)
+	}else if function == "updateShipmentReceiveStatus" {
+                return s.updateShipmentReceiveStatus(APIstub, args)
+        }
+
 
 	return shim.Error("Invalid Smart Contract function name.")
 }
@@ -112,7 +113,18 @@ Will add test data (10 tuna catches)to our network
  */
 func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Response {
 	tuna := []Tuna{
-		Tuna{Vessel: "923F", Status: "Fresh", Timestamp: "2018-10-22 15:02:44", Holder: "Miriam" , DeviceId: "Mydevice" , ParcelStatus:"New", Location:"51.9435, 8.2735"},
+		Tuna{ Vessel: "923F",
+		Status: "New",
+		Price: "$2",
+		Supplier:"Alice",
+		Distributor:"",
+		Timestamp: "2018-10-22 15:02:44",
+		ShipmentId:"",
+		ShipmentStatus:"",
+		ShipmentSentTimestamp:"",
+		ShipmentReceiveTimestamp:"",
+		DeviceId: "Mydevice" ,
+		Location:"51.9435, 8.2735"},
 	}
 	i := 0
 	for i < len(tuna) {
@@ -123,47 +135,9 @@ func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Respo
 		i = i + 1
 	}
 
-	shipment := []Shipment{
-		Shipment{Tuna:  tuna , ShipmentSentTimestamp: "2018-10-22 15:02:44", ShipmentReceiveTimestamp: "2018-10-22 15:02:44", ShipmentStatus: ""},
-	}
-
-	j := 0
-	for j < len(shipment) {
-		fmt.Println("j is ", j)
-		shipmentAsBytes, _ := json.Marshal(shipment[j])
-		APIstub.PutState(strconv.Itoa(j+1), shipmentAsBytes)
-		fmt.Println("Added", shipment[j])
-		j = j + 1
-	}
 
 	return shim.Success(nil)
 }
-
-
-// create shipment 
-
-func (s *SmartContract) sentshipment(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
-
-	if len(args) != 5 {
-		return shim.Error("Incorrect number of arguments. Expecting 5")
-	}
-
-	var Tuna []tuna;
-
-	tuna = JSON.stringify(args[1]);
-
-	var shipment = Shipment{ Tuna: tuna, ShipmentSentTimestamp: args[2], ShipmentReceiveTimestamp: args[3], ShipmentStatus: args[4]}
-
-	shipmentAsBytes, _ := json.Marshal(shipment)
-	err := APIstub.PutState(args[0], shipmentAsBytes)
-	if err != nil {
-		return shim.Error(fmt.Sprintf("Failed to record shipment catch: %s", args[0]))
-	}
-
-	return shim.Success(nil)
-}
-
-
 
 /*
  * The addRecord method *
@@ -172,11 +146,12 @@ This method takes in eight arguments (attributes to be saved in the ledger).
  */
 func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
-	if len(args) != 8 {
-		return shim.Error("Incorrect number of arguments. Expecting 8")
+	if len(args) != 9 {
+		return shim.Error("Incorrect number of arguments. Expecting 9")
 	}
 
-	var tuna = Tuna{ Vessel: args[1], Status: args[2], Timestamp: args[3], Holder: args[4] , DeviceId: args[5] , ParcelStatus:args[6] ,Location :args[7]}
+	var tuna = Tuna{ Vessel: args[1], Status: args[2], Timestamp: args[3], DeviceId: args[4] ,Location :args[5],ShipmentId:"",ShipmentStatus:"",ShipmentSentTimestamp:"",ShipmentReceiveTimestamp:"",
+			 Price: args[6],Supplier:args[7],Distributor:args[8]}
 
 	tunaAsBytes, _ := json.Marshal(tuna)
 	err := APIstub.PutState(args[0], tunaAsBytes)
@@ -194,7 +169,7 @@ This method does not take any arguments. Returns JSON string containing results.
  */
 func (s *SmartContract) queryAllRecord(APIstub shim.ChaincodeStubInterface) sc.Response {
 
-	startKey := "0"
+	startKey := "2"
 	endKey := "999"
 
 	resultsIterator, err := APIstub.GetStateByRange(startKey, endKey)
@@ -272,31 +247,70 @@ func (s *SmartContract) updateRecordStatus(APIstub shim.ChaincodeStubInterface, 
 The data in the world state can be updated with who has possession. 
 This function takes in 2 arguments, tuna id and new holder name. 
  */
- func (s *SmartContract) updateParcelRecordStatus(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+ func (s *SmartContract) updateShipmentSentStatus(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
-	if len(args) != 2 {
-		return shim.Error("Incorrect number of arguments. Expecting 2")
+	if len(args) != 4 {
+		return shim.Error("Incorrect number of arguments. Expecting 4444")
 	}
+
 
 	tunaAsBytes, _ := APIstub.GetState(args[0])
-	if tunaAsBytes == nil {
-		return shim.Error("Could not locate item")
-	}
-	tuna := Tuna{}
+        if tunaAsBytes == nil {
+                return shim.Error("Could not locate item")
+        }
+        tuna := Tuna{}
 
-	json.Unmarshal(tunaAsBytes, &tuna)
-	// Normally check that the specified argument is a valid holder of tuna
-	// we are skipping this check for this example
-	tuna.ParcelStatus = args[1]
+        json.Unmarshal(tunaAsBytes, &tuna)
+        // Normally check that the specified argument is a valid holder of tuna
+        // we are skipping this check for this example
+        tuna.ShipmentId = args[1]
+        tuna.ShipmentStatus = args[2]
+	tuna.ShipmentSentTimestamp = args[3]
 
-	tunaAsBytes, _ = json.Marshal(tuna)
-	err := APIstub.PutState(args[0], tunaAsBytes)
-	if err != nil {
-		return shim.Error(fmt.Sprintf("Failed to change item status: %s", args[0]))
-	}
+        tunaAsBytes, _ = json.Marshal(tuna)
+        err := APIstub.PutState(args[0], tunaAsBytes)
+        if err != nil {
+                return shim.Error(fmt.Sprintf("Failed to change item status: %s", args[0]))
+        }
+
 
 	return shim.Success(nil)
 }
+
+ func (s *SmartContract) updateShipmentReceiveStatus(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+
+        if len(args) != 4 {
+                return shim.Error("Incorrect number of arguments. Expecting 4")
+        }
+
+
+        tunaAsBytes, _ := APIstub.GetState(args[0])
+        if tunaAsBytes == nil {
+                return shim.Error("Could not locate item")
+        }
+        tuna := Tuna{}
+
+
+        json.Unmarshal(tunaAsBytes, &tuna)
+        // Normally check that the specified argument is a valid holder of tuna
+        // we are skipping this check for this example 
+
+	if tuna.ShipmentId == args[1] {
+		
+		tuna.ShipmentStatus = args[2]
+		tuna.ShipmentReceiveTimestamp = args[3]
+
+	}
+
+        tunaAsBytes, _ = json.Marshal(tuna)
+        err := APIstub.PutState(args[0], tunaAsBytes)
+        if err != nil {
+                return shim.Error(fmt.Sprintf("Failed to change item status: %s", args[0]))
+        }
+
+        return shim.Success(nil)
+}
+
 
 /*
  * main function *

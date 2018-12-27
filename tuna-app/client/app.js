@@ -66,9 +66,9 @@ app.controller('appController', function($scope, appFactory){
 		$('#cover-spin').show(0);	
 		for(var i=0;i<2;i++){
 		if(i=='0')
-		var channelUserPort = 'firstchannel+user+7051';	
+		var channelUserPort = 'firstchannel+user1+7051';	
 		else
-		var channelUserPort = 'secondchannel+user+7051';
+		var channelUserPort = 'secondchannel+user1+7051';
 	
 		appFactory.queryAllRecord(channelUserPort,function(data){
 
@@ -114,7 +114,7 @@ app.controller('appController', function($scope, appFactory){
 	}
 
 	$scope.addRecord = function(){
-		var id = $scope.tuna.id;
+		var id = $scope.tuna.price;
 		var vessel = $scope.tuna.vessel;
 		var holder = $scope.tuna.holder;
 		if(id!=''&& typeof id!="undefined" && typeof vessel!="undefined" && typeof holder!="undefined" && vessel!='' && holder!=''){
@@ -142,24 +142,31 @@ app.controller('appController', function($scope, appFactory){
 	}
 
 	$scope.sentItem = function(data){
+	
+	$scope.shipment = {};        
+	$scope.shipment.id = Date.now();
+	var dateUTC = new Date(); var dateUTC = dateUTC.getTime(); var dateIST = new Date(dateUTC); dateIST.setHours(dateIST.getHours() + 5);  dateIST.setMinutes(dateIST.getMinutes() + 30); 		
+	var timestamp1 = dateIST.toLocaleString();
+	var timestamp1 = timestamp1.replace(',','');
+	$scope.shipment.senttime = timestamp1;
+	$scope.shipment.channeluserport = $('#sentToDist').val();		
 
-	console.log(data)
 	var arr = [];	
-	data.forEach(function(element) {
+	data.forEach(function(element){
 		if(element.selected=='Y'){
-			arr.push(element);
+			arr.push(element.Key);
 		}
 	});
-
-	
-     
-    console.log(arr);	
-
-	//	var req = $scope.tuna_id;
-				
+	 
+		
+	for(var i=0 ; i < arr.length ; i++)
+	{	
+		$scope.shipment.key = arr[i];
+					
 		$('#cover-spin').show(0);
-		appFactory.sentItem(arr, function(data){
+		appFactory.sentItem($scope.shipment, function(data){
 			$scope.sentItem_status = data;
+		
 			 $('#cover-spin').hide(0);
 			if ($scope.sentItem_status == "Error: no record found"){
 				$.notify({
@@ -177,7 +184,7 @@ app.controller('appController', function($scope, appFactory){
 			} else{
 				$.notify({
 					icon: "far fa-handshake",
-					title: "<strong>success !! udpated ledger as item sent for id : "+req+" & Tx.no:</strong> ",
+					title: "<strong>success !! udpated ledger as item sent for shipment id : "+$scope.shipment.id+" & Tx.no:</strong> ",
 					message: data
 				},{
                                         offset: {
@@ -188,11 +195,12 @@ app.controller('appController', function($scope, appFactory){
 			    		});
 		        	}
 	        	});
-		}
-		
+        	}	
+	}
+
 	$scope.startReadingTempIOT=function(record){
+
 		var req = $scope.tuna_id;
-		
 		appFactory.startReadingTempIOT(req,function(data){
 			
 			if(data=="Item isReceived : true"){
@@ -233,7 +241,6 @@ app.controller('appController', function($scope, appFactory){
 		
 		$('#cover-spin').show(0);
 		
-
 		appFactory.queryRecord(reqData, function(data){
 
 				$scope.query_record_1 = data;
@@ -269,7 +276,7 @@ app.controller('appController', function($scope, appFactory){
 						}
 						if(channelUserPort == 'secondchannel+user3+9051')
 						{
-							$scope.all_record_1 = array ;
+							$scope.all_record_Bob = array ;
 						}	
 						else
 						{
@@ -278,7 +285,48 @@ app.controller('appController', function($scope, appFactory){
 				});
 	}
 
-	$scope.receiveItem = function(record){
+	 $scope.queryShipment = function(channelUserPort){
+                $('#cover-spin').show(0);
+                                appFactory.queryAllRecord(channelUserPort,function(data){
+                                                $('#cover-spin').hide(0);
+                                                var array = [];
+						var arr = []
+                                                for (var i = 0; i < data.length; i++){
+							if(arr.includes(data[i].Record.shipmentid)){
+								console.log('skipped shipment id adding tunaKeys');
+								var keys = data[i].Record.tunaKeys;
+								keys = keys+','+data[i].Key;
+								data[i].Record.tunaKeys = keys; 
+							}	
+							else{
+								arr[i] = data[i].Record.shipmentid;
+                                                                parseInt(data[i].Key);
+                                                                data[i].Record.Key = parseInt(data[i].Key);
+								data[i].Record.tunaKeys = data[i].Record.Key;
+                                                                array.push(data[i].Record);
+									
+							}
+                                                }
+
+                                                array.sort(function(a, b) {
+                                                        return parseFloat(a.Key) - parseFloat(b.Key);
+                                                });
+											
+						console.log(array);
+                                                if(channelUserPort == 'firstchannel+user2+8051')
+                                                {
+                                                        $scope.sent_shipment_Miriam = array ;
+
+                                                }
+                                                if(channelUserPort == 'secondchannel+user3+9051')
+                                                {
+                                                        $scope.sent_shipment_Bob = array ;
+                                                }
+                                });
+	
+	}
+
+	$scope.receiveShipmentMiriam = function(record){
 		var req = record.Key;
 
 		$('#cover-spin').show(0);	
@@ -315,9 +363,46 @@ app.controller('appController', function($scope, appFactory){
 		});
 	}
 
+	$scope.receiveShipmentBob = function(record){
+                var req = record.Key;
+
+                $('#cover-spin').show(0);
+                appFactory.receiveItem(req, function(data){
+                $scope.change_status = data;
+
+                 $('#cover-spin').hide(0);
+
+                        if ($scope.change_status == "Error: no record found"){
+                                $.notify({
+                                        icon: "fas fa-exclamation-triangle",
+                                        title: "<strong>Error !!</strong> ",
+                                        message: "No record found or some error occurred."
+                                },{
+                                        type: 'danger',
+                                         offset: {
+                                            x: 0,
+                                            y: 233
+                                        }
+                                });
+
+                        } else{
+                                $.notify({
+                                         icon: "far fa-handshake",
+                                        title: "<strong>success !! udpated ledger as item received for id : "+req+" & Tx.no:</strong> ",
+                                        message: data
+                                },{
+                                         offset: {
+                                            x: 0,
+                                            y: 233
+                                        }
+                                });
+                        }
+                });
+        }
+
+
 	$scope.changeStatus = function(record){
 		$('#cover-spin').show(0);		
-		console.log("spinner should print");
 		var req = record.Key;
 		appFactory.changeStatus(req, function(data){
 			$scope.change_status = data;
@@ -384,7 +469,7 @@ app.factory('appFactory', function($http){
 		
 		data.location = "13.052313,77.624934";
 	
-		var tuna = data.id + "-" + data.holder + "-" + data.vessel + "-" +  data.location;
+		var tuna = data.price + "-" + data.holder + "-" + data.vessel + "-" +  data.location;
 
     	$http.get('/add_record/'+tuna+'?').success(function(output){
 			callback(output)
@@ -403,7 +488,18 @@ app.factory('appFactory', function($http){
 	}
 
 	factory.sentItem = function(arr, callback){
-		$http.get('/sent_item/'+arr+'?').success(function(output){
+		
+		var senttime = arr.senttime.replace('/', '_');
+		senttime = senttime.replace('/', '_');
+		
+		console.log(arr.channeluserport);		
+
+	
+		var shipment = arr.key + "-" + senttime + "-" + arr.id + "-"+arr.channeluserport;	
+		
+		console.log(shipment);
+	
+		$http.get('/sent_item/'+shipment+'?').success(function(output){
 			callback(output)
 		});
 	}
@@ -419,11 +515,5 @@ app.factory('appFactory', function($http){
 			callback(output)
 		});
 	}
-
-	
-	
 	return factory;
-
 });
-
-

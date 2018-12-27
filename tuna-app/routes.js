@@ -29,7 +29,7 @@ module.exports = function(app){
     assests.change_status(req, res);
   });
 
-  app.get('/sent_item/:record_id?', function(req, res){
+  app.get('/sent_item/:shipment?', function(req, res){
       assests.sent_item(req,res);
   });
 
