@@ -179,8 +179,8 @@
 		    <br><br>
                     <table id="query_record" class="table table-striped table-bordered" align="center">
                         <tbody><tr>
-                            <th>Catch Id</th>
-                            <th>Catch Timestamp</th>
+                            <th>Id</th>
+                            <th>Timestamp</th>
                             <th>Distributor</th>
                             <th>Status</th>
                             <th>Vessel</th>
@@ -224,8 +224,8 @@
                     </p> -->
                     <table ng-table="userTable" class="table table-striped table-bordered">
                         <tbody><tr>
-                            <th>Catch ID</th>
-                            <th>Catch Timestamp</th>
+                            <th ng-click="sort('Key')">ID</th>
+                            <th>Timestamp</th>
                             <th>Distributor</th>
                             <th>Status</th>
                             <th>Vessel</th>
@@ -284,24 +284,22 @@
                             <th>Supplier</th>
                             <th>Status</th>
 			    <th>Shipment sent time</th>
+			    <th>Catch Location <br>(Longitude, Latitude)</th> 
                             <th>Shipment details</th>
-			    <th> Action </th>	
                         </tr>
                         <tr ng-repeat="query_record_receive in sent_shipment_Miriam" ng-if="query_record_receive.shipmentstatus=='Sent'">
                             <td>{{query_record_receive.shipmentid}}</td>
                             <td>{{query_record_receive.Supplier}}</td>
                             <td>{{query_record_receive.status}}</td>
 			    <td>{{query_record_receive.ShipmentSentTimestamp}}</td>
+			    <td>{{query_record_receive.location}}</td>        
                             <td>
 				 <button type="button" class="btn btn-primary fas fa-shipping-fast" data-toggle="modal" data-target="#MiriamModal"/>
                             </td>
-			    <td>
-                                <input ng-if="query_record_receive.shipmentstatus=='Sent' && query_record_receive.status=='New'" id="receiveItem" type="submit" value="Received" class="btn btn-outline-primary" ng-click="receiveShipmentMiriam(shipment_tuna_Miriam)" onclick="">
-			    </td>	
                         </tr>
                     </tbody></table>
             </div>
-	<input id="receiveShipmentMiriam"  value="firstchannel+user2+8051+8053" hidden>
+	
 	 <!--start modal of list  tuna for miriam ---> 
 	<div class="modal" id="MiriamModal">
        	 <div class="modal-dialog modal-lg">
@@ -309,7 +307,7 @@
 
       		<!-- Modal Header -->
     		  <div class="modal-header">
-       			 <h4 class="modal-title">Shipment details</h4>
+       			 <h4 class="modal-title">Shipment id {{tuna_shipment_record_Miriam.shipmentid}}</h4>
         			<button type="button" class="close" data-dismiss="modal">&times;</button>
 		   </div>
 
@@ -319,7 +317,7 @@
       		<table id="tuna_shipment_record_Miriam" class="table table-striped table-bordered" style="width:100%" align="center">
             <thead>
               <tr>
-                <th>Catch ID</th>
+                <th>ID</th>
                 <th>Catch Timestamp</th>
                 <th>Supplier</th>
                 <th>Status</th>
@@ -329,7 +327,7 @@
               </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="tuna_shipment_record_Miriam in shipment_tuna_Miriam" ng-if="tuna_shipment_record_Miriam.shipmentstatus=='Sent'">
+                <tr ng-repeat="tuna_shipment_record_Miriam in shipment_tuna_Miriam" ng-if="query_record_receive.shipmentstatus=='Sent'">
                   <td>{{tuna_shipment_record_Miriam.Key}}</td>
                   <td>{{tuna_shipment_record_Miriam.timestamp}}</td>
                   <td>{{tuna_shipment_record_Miriam.Supplier}}</td>
@@ -339,7 +337,6 @@
                   <td>{{tuna_shipment_record_Miriam.price}}</td>
                 </tr>
             </tbody>
-	    	
           </table>
      	      </div>
 
@@ -351,8 +348,11 @@
 	 </div>
 	</div>
 	<!-- END modal list of tuna for miriam --->  
-            
-	   <div class="tab-pane fade" id="nav-profile1" role="tabpanel" aria-labelledby="nav-profile-tab">
+					
+
+
+
+            <div class="tab-pane fade" id="nav-profile1" role="tabpanel" aria-labelledby="nav-profile-tab">
                    <br>
 		    <div class="alert alert-dark" role="alert">
                                  Query All the catch IDs with shipment status.
@@ -370,8 +370,8 @@
                         <table id="all_record_Miriam" class="table table-striped table-bordered" style="width:100%" align="center">
                           <thead> 
 			     <tr>
-                                <th>Catch ID</th>
-                                <th>Catch Timestamp</th>
+                                <th>ID</th>
+                                <th>Timestamp</th>
                                 <th>Supplier</th>
                                 <th>Status</th>
                                 <th>Vessel</th>
@@ -429,7 +429,7 @@
                             <th>Supplier</th>
                             <th>Status</th>
                             <th>Shipment sent time</th>
-                            <th>Shipment details</th>
+                            <th>Catch Location <br>(Longitude, Latitude)</th>
                             <th>Action</th>
                          </tr>
                          <tr ng-repeat="bob_query_record_receive in sent_shipment_Bob" ng-if="bob_query_record_receive.shipmentstatus=='Sent'">
@@ -437,11 +437,9 @@
                             <td>{{bob_query_record_receive.Supplier}}</td>
                             <td>{{bob_query_record_receive.status}}</td>
                             <td>{{bob_query_record_receive.ShipmentSentTimestamp}}</td>
+                            <td>{{bob_query_record_receive.location}}</td>
                             <td>
-				<button type="button" class="btn btn-primary fas fa-shipping-fast" data-toggle="modal" data-target="#BobModal"/>		
-			    </td>
-                            <td>
-				<input ng-if="bob_query_record_receive.shipmentstatus=='Sent' && bob_query_record_receive.status=='New'" id="receiveItem" type="submit" value="Received" class="btn btn-outline-primary" ng-click="receiveShipmentMiriam(shipment_tuna_Bob)" onclick="stopIOT()">
+				<input ng-if="bob_query_record_receive.shipmentstatus=='Sent' && bob_query_record_receive.status=='New'" id="receiveItem" type="submit" value="Received" class="btn btn-outline-primary" ng-click="receiveItem(query_record_1)" onclick="stopIOT()">
                                 <!--<span ng-show="query_record_1.shipmentstatus=='Sent'" class="badge badge-success ng-hide">Received</span>
                                 <span ng-show="query_record_1.ParcelStatus=='New'" class="badge badge-info ng-hide"> New entry found item yet be sent</span>
                                  ngIf: query_record_1.ParcelStatus=='Sent' && query_record_1.status=='New' -->
@@ -450,61 +448,6 @@
                         </tr>
                     </table>
             </div>
-
-	<!--start modal of list  tuna for Bob --->
-        <div class="modal" id="BobModal">
-         <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-
-                <!-- Modal Header -->
-                  <div class="modal-header">
-                         <h4 class="modal-title">Shipment details</h4>
-                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                   </div>
-
-                <!-- Modal body -->
-
-              <div class="modal-body">
-                <table id="tuna_shipment_record_Miriam" class="table table-striped table-bordered" style="width:100%" align="center">
-            <thead>
-              <tr>
-                <th>Catch ID</th>
-                <th>Catch Timestamp</th>
-                <th>Supplier</th>
-                <th>Status</th>
-                <th>Vessel</th>
-                <th>Catch Location <br>(Longitude, Latitude)</th>
-                <th>Price</th>
-              </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="tuna_shipment_record_Bob in shipment_tuna_Bob" ng-if="tuna_shipment_record_Bob.shipmentstatus=='Sent'">
-                  <td>{{tuna_shipment_record_Bob.Key}}</td>
-                  <td>{{tuna_shipment_record_Bob.timestamp}}</td>
-                  <td>{{tuna_shipment_record_Bob.Supplier}}</td>
-                  <td>{{tuna_shipment_record_Bob.status}}</td>
-                  <td>{{tuna_shipment_record_Bob.vessel}}</td>
-                  <td>{{tuna_shipment_record_Bob.location}}</td>
-                  <td>{{tuna_shipment_record_Bob.price}}</td>
-                </tr>
-            </tbody>
-
-          </table>
-              </div>
-
-                  <!-- Modal footer -->
-              <div class="modal-footer">
-                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-              </div>
-           </div>
-         </div>
-        </div>
-        <!-- END modal list of tuna for miriam --->
-
-		
-		
-
-
             <div class="tab-pane fade" id="nav-profile2" role="tabpanel" aria-labelledby="nav-profile-tab">
                 <br>
                 <div class="alert alert-dark" role="alert">
@@ -523,8 +466,8 @@
                         <table id="all_record_1" class="table table-striped table-bordered" style="width:100%" align="center">
                           <thead> 
 			     <tr>
-                                <th>Catch ID</th>
-                                <th>Catch Timestamp</th>
+                                <th>ID</th>
+                                <th>Timestamp</th>
                                 <th>Supplier</th>
                                 <th>Status</th>
                                 <th>Vessel</th>

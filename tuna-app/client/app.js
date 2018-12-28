@@ -290,22 +290,27 @@ app.controller('appController', function($scope, appFactory){
                                 appFactory.queryAllRecord(channelUserPort,function(data){
                                                 $('#cover-spin').hide(0);
                                                 var array = [];
-						var arr = []
+						var arraytuna = [];	
+						var arr = [];
                                                 for (var i = 0; i < data.length; i++){
-							if(arr.includes(data[i].Record.shipmentid)){
+							if(arr.includes(data[i].Record.shipmentid) && data[i].Record.shipmentstatus == 'Sent'){
 								console.log('skipped shipment id adding tunaKeys');
-								var keys = data[i].Record.tunaKeys;
-								keys = keys+','+data[i].Key;
-								data[i].Record.tunaKeys = keys; 
+								parseInt(data[i].Key);
+                                                                data[i].Record.Key = parseInt(data[i].Key);
+                                                                arraytuna.push(data[i].Record);
 							}	
-							else{
+							else if(data[i].Record.shipmentstatus == 'Sent'){
 								arr[i] = data[i].Record.shipmentid;
                                                                 parseInt(data[i].Key);
                                                                 data[i].Record.Key = parseInt(data[i].Key);
-								data[i].Record.tunaKeys = data[i].Record.Key;
                                                                 array.push(data[i].Record);
+								arraytuna.push(data[i].Record);	
 									
 							}
+							else {
+								console.log('No shipment found !!');
+							}
+
                                                 }
 
                                                 array.sort(function(a, b) {
@@ -316,21 +321,43 @@ app.controller('appController', function($scope, appFactory){
                                                 if(channelUserPort == 'firstchannel+user2+8051')
                                                 {
                                                         $scope.sent_shipment_Miriam = array ;
+							$scope.shipment_tuna_Miriam = arraytuna ;
 
                                                 }
                                                 if(channelUserPort == 'secondchannel+user3+9051')
                                                 {
                                                         $scope.sent_shipment_Bob = array ;
+							$scope.shipment_tuna_Bob = arraytuna ;
                                                 }
                                 });
-	
+
 	}
 
-	$scope.receiveShipmentMiriam = function(record){
-		var req = record.Key;
+	$scope.receiveShipmentMiriam = function(receiveshipment){
+	
+	$scope.receiveshipment = {};
+	var dateUTC = new Date(); var dateUTC = dateUTC.getTime(); var dateIST = new Date(dateUTC); dateIST.setHours(dateIST.getHours() + 5);  dateIST.setMinutes(dateIST.getMinutes() + 30);
+        var timestamp1 = dateIST.toLocaleString();
+        var timestamp1 = timestamp1.replace(',','');
+	
+        $scope.receiveshipment.receivetimestamp = timestamp1;
+        $scope.receiveshipment.channeluserport = $('#receiveShipmentMiriam').val();
+	console.log($scope.receiveshipment.channeluserport)
+        var arr = [];
+	var arrshipid = [];
+        receiveshipment.forEach(function(element){
+                        arr.push(element.Key);
+			arrshipid.push(element.shipmentid);
+        });
 
+
+        for(var i=0 ; i < arr.length ; i++)
+        {
+                $scope.receiveshipment.key = arr[i];
+		$scope.receiveshipment.shipmentid = arrshipid[i];
+ 
 		$('#cover-spin').show(0);	
-		appFactory.receiveItem(req, function(data){
+		appFactory.receiveItem($scope.receiveshipment, function(data){
 		$scope.change_status = data;
 
 	    	 $('#cover-spin').hide(0);
@@ -361,13 +388,15 @@ app.controller('appController', function($scope, appFactory){
 				});
 			}
 		});
-	}
+ 	 }
+	}	
 
 	$scope.receiveShipmentBob = function(record){
-                var req = record.Key;
-
+		
+		console.log(record);
+	
                 $('#cover-spin').show(0);
-                appFactory.receiveItem(req, function(data){
+                appFactory.receiveItem(record, function(data){
                 $scope.change_status = data;
 
                  $('#cover-spin').hide(0);
@@ -497,7 +526,6 @@ app.factory('appFactory', function($http){
 	
 		var shipment = arr.key + "-" + senttime + "-" + arr.id + "-"+arr.channeluserport;	
 		
-		console.log(shipment);
 	
 		$http.get('/sent_item/'+shipment+'?').success(function(output){
 			callback(output)
@@ -510,8 +538,14 @@ app.factory('appFactory', function($http){
 		});
 	},
 
-	factory.receiveItem = function(id, callback){
-    	$http.get('/receive_item/'+id+'?').success(function(output){
+	factory.receiveItem = function(record, callback){
+
+	var receivetime = record.receivetimestamp.replace('/', '_');
+        receivetime = receivetime.replace('/', '_');
+        console.log(record.channeluserport);
+        var record = record.key + "-" + receivetime + "-" + record.shipmentid + "-"+record.channeluserport;
+
+    	$http.get('/receive_item/'+record+'?').success(function(output){
 			callback(output)
 		});
 	}

@@ -33,7 +33,7 @@ module.exports = function(app){
       assests.sent_item(req,res);
   });
 
-  app.get('/receive_item/:record_id?', function(req, res){
+  app.get('/receive_item/:record?', function(req, res){
       assests.receive_item(req,res);
   });
 
