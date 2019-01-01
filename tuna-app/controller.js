@@ -107,10 +107,10 @@ return{
 		var key = Date.now().toString();		
 		var timestamp = timestamp1;
 		var deviceId = "Mydevice";
-		var price = array[0]
+		var price = "$"+array[0]
 		var vessel = array[2]
 		var channleholder = array[1]
-                var arr = channleholder.toString().split("+");
+        var arr = channleholder.toString().split("+");
 		var supplier = "Alice"
 		var distributor = arr[1]
 		var channel = arr[0]	
@@ -347,8 +347,14 @@ return{
 		//console.log(resIOT); 
 		//resIOT = JSON.parse(resIOT);               
 
-		//var array = req.params.holder.split("-");
-		var key = req.params.record_id;
+		var array = req.params.record_id.split("-");
+		var key = array[0];
+		var arr = array[1].split("+");
+		var channelName = arr[0];
+		var userName = arr[1];
+		var port1 = arr[2];
+		var port2 = arr[3];
+		
 		var recordStatus = "Fresh";
 
 		console.log("changing holder of tuna catch: " + recordStatus);
@@ -356,8 +362,8 @@ return{
 		var fabric_client = new Fabric_Client();
 
 		// setup the fabric network
-		var channel = fabric_client.newChannel('mychannel');
-		var peer = fabric_client.newPeer('grpc://localhost:7051');
+		var channel = fabric_client.newChannel(channelName);
+		var peer = fabric_client.newPeer('grpc://localhost:'+port1);
 		channel.addPeer(peer);
 		var order = fabric_client.newOrderer('grpc://localhost:7050')
 		channel.addOrderer(order);
@@ -380,13 +386,13 @@ return{
 		    fabric_client.setCryptoSuite(crypto_suite);
 
 		    // get the enrolled user from persistence, this user will sign all requests
-		    return fabric_client.getUserContext('user1', true);
+		    return fabric_client.getUserContext(userName, true);
 		}).then((user_from_store) => {
 		    if (user_from_store && user_from_store.isEnrolled()) {
-		        console.log('Successfully loaded user1 from persistence');
+		        console.log('Successfully loaded '+userName+' from persistence');
 		        member_user = user_from_store;
 		    } else {
-		        throw new Error('Failed to get user1.... run registerUser.js');
+		        throw new Error('Failed to get '+userName+' run registerUser.js');
 		    }
 
 		    // get a transaction id object based on the current user assigned to fabric client
@@ -400,7 +406,7 @@ return{
 		        chaincodeId: 'mycc',
 		        fcn: 'updateRecordStatus',
 		        args: [key, recordStatus],
-		        chainId: 'mychannel',
+		        chainId: channelName,
 		        txId: tx_id
 		    };
 
@@ -441,7 +447,7 @@ return{
 		        // get an eventhub once the fabric client has a user assigned. The user
 		        // is required bacause the event registration must be signed
 		        let event_hub = fabric_client.newEventHub();
-		        event_hub.setPeerAddr('grpc://localhost:7053');
+		        event_hub.setPeerAddr('grpc://localhost:'+port2);
 
 		        // using resolve the promise so that result status may be processed
 		        // under the then clause rather than having the catch clause process
@@ -679,17 +685,20 @@ return{
 		var array = req.params.record.split("-");
 		
 		var key = array[0]
-                var shipmentreceivetimestamp = array[1]
-                var shipmentid = array[2]
-                var shipmentstatus = "Delivered";
-                var data = array[3].split("+");
-                var channelName = data[0]
+		var shipmentreceivetimestamp = array[1]
+		shipmentreceivetimestamp = shipmentreceivetimestamp.replace(/_/g,'-');
+	
+		var shipmentid = array[2]
+		var shipmentstatus = "Delivered";
+		var data = array[3].split("+");
+		var channelName = data[0]
 		var userName = data[1]
-		var port1 = data[3]
-		var port2 = data[4]
-		
+		var port1 = data[2]
+		var port2 = data[3]
+		//console.log(key+" "+shipmentreceivetimestamp+" "+shipmentid+" "+shipmentstatus+" "+channelName+" "+userName+" "+port1+" "+port2);
 
-		//IOTStatus.Item_received(req,res);
+		IOTStatus. Item_receive(shipmentid,res);
+
 			
 		//var array = req.params.holder.split("-");
 
@@ -697,7 +706,7 @@ return{
 
 		// setup the fabric network
 		var channel = fabric_client.newChannel(channelName);
-		var peer = fabric_client.newPeer('grpc://localhost:'+port1);
+		var peer = fabric_client.newPeer('grpc://localhost:7051');
 		channel.addPeer(peer);
 		var order = fabric_client.newOrderer('grpc://localhost:7050')
 		channel.addOrderer(order);
@@ -738,7 +747,7 @@ return{
 		    var request = {
 		        //targets : --- letting this default to the peers assigned to the channel
 		        chaincodeId: 'mycc',
-		        fcn: 'updateReceiveShipmentStatus',
+		        fcn: 'updateShipmentReceiveStatus',
 		        args: [key,shipmentid,shipmentstatus,shipmentreceivetimestamp],
 		        chainId: channelName,
 		        txId: tx_id

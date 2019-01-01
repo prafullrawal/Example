@@ -42,13 +42,24 @@ module.exports = (function() {
             response = {};
             response.temp = [];
             response.state;
-            response.recordId = req.params.record_id;
+	    var data = req.params.record_id; 
+	
+	    data = JSON.parse(data);
+	    response.recordId = data.shipmentid;
+	    response.arrayKeys = data.keys;  
+            var reqchannel = data.channelName;
+	    reqchannel = reqchannel.split('+');
+	    var channelName = reqchannel[0]
+	
+	    console.log(response.arrayKeys);	
+
 
             // Insert new record
             var requestDetails = {
-                _id: "item_" + req.params.record_id,
-                status: "",
+                _id: "item_" + response.recordId,
+                Item_status: "New",
                 tem: "",
+		tunaKeys:response.arrayKeys,
                 isReceived: "false"
             }
 
@@ -94,7 +105,7 @@ module.exports = (function() {
 
                         dbForIot.get(uniqueId, function(err, data) {
 
-                            if (data.isReceived == "false") {
+                            if (data.isReceived == "false" && data.Item_status=="Fresh") {
 									
 									response.temp.push(json.temperature);
 									response.state = "Waste";
@@ -105,13 +116,15 @@ module.exports = (function() {
 										_rev: data._rev,
 										Item_status: response.state,
 										temp: response.temp,
+										tunaKeys:response.arrayKeys,									
 										isReceived: "false"
 									}
 									dbForIot.insert(updateddata, function(err, data) {
 										console.log("temp updated and item still not received");
 									});
-
-									var key = response.recordId;
+ 							for(var i=0; i < response.arrayKeys.length; i++){
+									var key = response.arrayKeys[i];
+									key = key.toString();
 									var recordStatus = response.state;
 
 									console.log("changing holder of tuna catch: " + recordStatus);
@@ -119,7 +132,7 @@ module.exports = (function() {
 									var fabric_client = new Fabric_Client();
 
 									// setup the fabric network
-									var channel = fabric_client.newChannel('mychannel');
+									var channel = fabric_client.newChannel(channelName);
 									var peer = fabric_client.newPeer('grpc://localhost:7051');
 									channel.addPeer(peer);
 									var order = fabric_client.newOrderer('grpc://localhost:7050')
@@ -166,7 +179,7 @@ module.exports = (function() {
 											chaincodeId: 'mycc',
 											fcn: 'updateRecordStatus',
 											args: [key, recordStatus],
-											chainId: 'mychannel',
+											chainId: channelName,
 											txId: tx_id
 										};
 
@@ -265,7 +278,7 @@ module.exports = (function() {
 
 										if (results && results[1] && results[1].event_status === 'VALID') {
 											console.log('Successfully committed the change to the ledger by the peer');
-											res.send(tx_id.getTransactionID())
+											// res.send(tx_id.getTransactionID())
 										} else {
 											console.log('Transaction failed to be committed to the ledger due to ::' + results[1].event_status);
 										}
@@ -274,7 +287,8 @@ module.exports = (function() {
 										res.send("Error: no tuna catch found");
 									});
 									console.log("Disconnecting while = state : Waste & isReceived : false");
-									appClient.disconnect();
+									//appClient.disconnect();
+								    }	
 
 								} else {
 									console.log("Disconnecting while = state : Waste & isReceived : true");
@@ -290,9 +304,11 @@ module.exports = (function() {
 			    response.temp.push(json.temperature);
                             // query db check for isReceived
                             uniqueId = "item_" + response.recordId;
+				
+			   console.log(response.recordId);
 
                             dbForIot.get(uniqueId, function(err, data) {
-
+ 			     if(!err){	
                                 if (data.isReceived == "false") {
                                     console.log("Accepted : temp =" + JSON.stringify(response));
                                     var updateddata = {
@@ -300,6 +316,7 @@ module.exports = (function() {
                                         _rev: data._rev,
                                         Item_status: response.state,
                                         temp: response.temp,
+					tunaKeys:response.arrayKeys,
                                         isReceived: "false"
                                     }
                                         dbForIot.insert(updateddata, function(err, data) {
@@ -311,15 +328,19 @@ module.exports = (function() {
                                     appClient.disconnect();
 				    res.send("Item isReceived : true");	
                                 }
+			      }
+			    	
                             });
                         }
                     }
                   });
 		},	
 			
-		Item_received: function(req, res) {
-	
-		uniqueId = "item_"+req.params.record_id;
+		Item_receive: function(req, res) {
+			
+		console.log(req);	
+		
+		uniqueId = "item_"+req;
 	
 		var response = { };		 
 
@@ -331,6 +352,7 @@ module.exports = (function() {
                                         _rev: data._rev,
                                         Item_status: data.Item_status,
                                         temp: data.temp,
+					tunaKeys:data.tunaKeys,
                                         isReceived: "true"
                                     }
                                     dbForIot.insert(updateddata, function(err, data) {
